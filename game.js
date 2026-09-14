@@ -1,46 +1,10 @@
-const $=s=>document.querySelector(s);
-const defaults={hunger:70,mood:70,energy:70,streak:0,outfit:"classic"};
-let state=JSON.parse(localStorage.getItem("jinxTamagotchi")||"null")||defaults;
-let totalSeconds=25*60, remaining=totalSeconds, running=false, interval=null, focusMode=true;
-
-function save(){localStorage.setItem("jinxTamagotchi",JSON.stringify(state))}
-function clamp(n){return Math.max(0,Math.min(100,Math.round(n)))}
-function render(){
-  $("#hunger").textContent=state.hunger; $("#mood").textContent=state.mood; $("#energy").textContent=state.energy;
-  $("#hungerBar").style.width=state.hunger+"%"; $("#moodBar").style.width=state.mood+"%"; $("#energyBar").style.width=state.energy+"%";
-  $("#streak").textContent=state.streak;
-  $("#character").className="character "+state.outfit;
-  document.querySelectorAll(".outfit").forEach(b=>b.classList.toggle("active",b.dataset.outfit===state.outfit));
-  const m=Math.floor(remaining/60),s=remaining%60;
-  $("#timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-  $("#mode").textContent=focusMode?"Фокус":"Отдых";
-}
-function say(t){$("#speech").textContent=t}
-function mutate(a,b,c,msg){state.hunger=clamp(state.hunger+a);state.mood=clamp(state.mood+b);state.energy=clamp(state.energy+c);save();render();say(msg)}
-
-$("#feed").onclick=()=>mutate(18,5,-3,"М-м! Вот это еда!");
-$("#play").onclick=()=>mutate(-4,16,-10,"Ха! Ещё раз!");
-$("#rest").onclick=()=>mutate(0,6,20,"Zzz... не шумите.");
-
-document.querySelectorAll(".outfit").forEach(b=>b.onclick=()=>{state.outfit=b.dataset.outfit;save();render();say("Неплохо выгляжу, да?")});
-document.querySelectorAll(".preset").forEach(b=>b.onclick=()=>{
- if(running)return;
- totalSeconds=Number(b.dataset.min)*60;remaining=totalSeconds;
- document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();
-});
-$("#start").onclick=()=>{
- if(running){clearInterval(interval);running=false;$("#start").textContent="▶ Продолжить";return}
- running=true;$("#start").textContent="Ⅱ Пауза";say(focusMode?"Не отвлекайся. Я тоже буду работать.":"Перерыв. Отдыхай!");
- interval=setInterval(()=>{
-   remaining--;render();
-   if(remaining<=0){clearInterval(interval);running=false;
-     if(focusMode){state.streak++;state.mood=clamp(state.mood+15);state.energy=clamp(state.energy-5);save();say("Готово! Ты справился. 💜");focusMode=false;remaining=5*60}
-     else{say("Перерыв закончился. Ещё один заход?");focusMode=true;remaining=25*60}
-     $("#start").textContent="▶ Начать";render();
-   }
- },1000)
-};
-$("#reset").onclick=()=>{clearInterval(interval);running=false;focusMode=true;remaining=totalSeconds;$("#start").textContent="▶ Начать";render();say("Ну что, работаем?")};
-
-setInterval(()=>{if(!running){state.hunger=clamp(state.hunger-1);state.energy=clamp(state.energy-1);save();render()}},60000);
-render();
+const $=s=>document.querySelector(s);const defaults={hunger:70,mood:85,energy:65,clean:80,streak:0,sessions:0,xp:0,level:1,outfit:"classic"};let S=JSON.parse(localStorage.getItem("jinxDeluxe")||"null")||defaults;let remain=1500,total=1500,running=false,mode="focus",iv=null;
+function save(){localStorage.setItem("jinxDeluxe",JSON.stringify(S))}function clamp(x){return Math.max(0,Math.min(100,Math.round(x)))}function stats(){let a=[["🍴","Голод","hunger"],["♥","Настроение","mood"],["⚡","Энергия","energy"],["💧","Чистота","clean"]];$("#stats").innerHTML=a.map(([i,n,k])=>`<div class="stat"><div class="statrow"><span>${i} ${n}</span><b>${S[k]}%</b></div><div class="bar"><div class="fill" style="width:${S[k]}%;background:#9e66e8"></div></div></div>`).join("");$("#streak").textContent=S.streak;$("#sessions").textContent=S.sessions;$("#level").textContent=S.level}
+function render(){stats();$("#timer").textContent=String(Math.floor(remain/60)).padStart(2,"0")+":"+String(remain%60).padStart(2,"0");document.querySelectorAll(".outfits button").forEach(b=>b.classList.toggle("active",b.dataset.outfit===S.outfit))}
+function say(t){$("#speech").textContent=t;$("#bubble").textContent=t}
+function act(k){if(k==="feed"){S.hunger=clamp(S.hunger+20);S.mood=clamp(S.mood+5);say("М-м! Вот это еда! ♥")}if(k==="play"){S.hunger=clamp(S.hunger-5);S.energy=clamp(S.energy-10);S.mood=clamp(S.mood+18);say("Ха! Ещё раз!")}if(k==="rest"){S.energy=clamp(S.energy+25);S.mood=clamp(S.mood+5);say("Zzz... не шумите.")}save();render()}
+function food(n){S.hunger=clamp(S.hunger+n);S.mood=clamp(S.mood+4);save();say("Спасибо! Ещё!");render()}
+document.querySelectorAll(".outfits button").forEach(b=>b.onclick=()=>{S.outfit=b.dataset.outfit;save();render();say("Неплохо выгляжу, да?")});
+document.querySelectorAll(".modes button").forEach(b=>b.onclick=()=>{if(running)return;total=+b.dataset.min*60;remain=total;document.querySelectorAll(".modes button").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");render()});
+$("#start").onclick=()=>{if(running){clearInterval(iv);running=false;$("#start").textContent="▶ Продолжить";return}running=true;$("#start").textContent="Ⅱ Пауза";say(mode==="focus"?"Фокусируемся вместе. Не отвлекайся. ♥":"Отдыхай, ты заслужил.");iv=setInterval(()=>{remain--;render();if(remain<=0){clearInterval(iv);running=false;if(mode==="focus"){S.sessions++;S.streak++;S.xp+=45;S.mood=clamp(S.mood+15);S.energy=clamp(S.energy-5);if(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;say("Новый уровень! Ты крутой. ⭐")}else say("Готово! Ещё одна победа. ♥");mode="break";remain=300;total=300}else{mode="focus";remain=1500;total=1500;say("Перерыв окончен. Погнали снова!")}save();$("#start").textContent="▶ Начать";render()}},1000)};
+$("#reset").onclick=()=>{clearInterval(iv);running=false;remain=total;$("#start").textContent="▶ Начать";render()};setInterval(()=>{if(!running){S.hunger=clamp(S.hunger-1);S.energy=clamp(S.energy-1);S.clean=clamp(S.clean-1);save();render()}},60000);render();
