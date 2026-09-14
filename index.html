@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Jinx Focus Tamagotchi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <p class="eyebrow">FOCUS COMPANION</p>
+        <h1>Jinx Tamagotchi</h1>
+      </div>
+      <div class="streak">🔥 <span id="streak">0</span> focus</div>
+    </header>
+
+    <section class="game">
+      <aside class="panel stats">
+        <h2>Состояние</h2>
+        <div class="stat"><span>🍖 Голод</span><div class="bar"><i id="hungerBar"></i></div><b id="hunger">70</b></div>
+        <div class="stat"><span>💜 Настроение</span><div class="bar"><i id="moodBar"></i></div><b id="mood">70</b></div>
+        <div class="stat"><span>⚡ Энергия</span><div class="bar"><i id="energyBar"></i></div><b id="energy">70</b></div>
+
+        <h2>Уход</h2>
+        <div class="buttons">
+          <button id="feed">🍖 Покормить</button>
+          <button id="play">🎮 Поиграть</button>
+          <button id="rest">😴 Уложить спать</button>
+        </div>
+      </aside>
+
+      <section class="room">
+        <div class="speech" id="speech">Ну что, работаем?</div>
+        <div class="character" id="character" aria-label="Маленькая Jinx">
+          <div class="hair">〰〰〰</div>
+          <div class="face">
+            <span class="eye">●</span><span class="eye">●</span>
+            <div class="mouth">◡</div>
+          </div>
+          <div class="body">♡</div>
+          <div class="legs">╱╲</div>
+        </div>
+        <div class="room-floor"></div>
+      </section>
+
+      <aside class="panel focus">
+        <h2>Pomodoro</h2>
+        <p class="mode" id="mode">Фокус</p>
+        <div class="timer" id="timer">25:00</div>
+        <div class="timer-buttons">
+          <button class="preset active" data-min="25">25</button>
+          <button class="preset" data-min="15">15</button>
+          <button class="preset" data-min="45">45</button>
+        </div>
+        <button class="primary" id="start">▶ Начать фокус</button>
+        <button id="reset">↻ Сбросить</button>
+        <p class="hint">Закончи сессию — Jinx получит настроение и опыт.</p>
+      </aside>
+    </section>
+
+    <section class="panel wardrobe">
+      <div>
+        <h2>👗 Гардероб</h2>
+        <p>Выбери образ для Jinx</p>
+      </div>
+      <div class="outfits">
+        <button class="outfit active" data-outfit="classic">💙 Классика</button>
+        <button class="outfit" data-outfit="hoodie">🖤 Худи</button>
+        <button class="outfit" data-outfit="pink">💗 Розовый</button>
+        <button class="outfit" data-outfit="sleep">🌙 Пижама</button>
+      </div>
+    </section>
+
+    <footer>Прогресс сохраняется автоматически в этом браузере.</footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
