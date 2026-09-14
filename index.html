@@ -12,7 +12,7 @@ header{display:flex;justify-content:space-between;align-items:center}.brand{font
 .stat{margin:17px 0}.statline{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}.bar{height:8px;border:1px solid #9eb8d3;border-radius:10px;overflow:hidden}.fill{height:100%;background:#69b7df;border-radius:10px}
 .center{min-height:620px;display:flex;align-items:center;justify-content:center;position:relative}.character{width:min(400px,74vw);max-height:570px;object-fit:contain;filter:drop-shadow(0 16px 12px #42506c20);transition:.35s}.character.sleep{display:none}.sleeping{display:none;width:min(520px,82vw);max-height:360px;object-fit:contain;filter:drop-shadow(0 14px 12px #42506c15)}.sleeping.on{display:block}
 .speech{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border:1px solid #d4ddea;border-radius:18px;padding:11px 16px;box-shadow:0 8px 25px #39435c12;font-size:13px;white-space:nowrap;max-width:270px;text-align:center}.speech:after{content:"";position:absolute;bottom:-8px;left:50%;width:15px;height:15px;background:#fff;border-right:1px solid #d4ddea;border-bottom:1px solid #d4ddea;transform:rotate(45deg)}
-.outfitBadge{position:absolute;top:18%;right:13%;background:#fff;border:1px solid #dce3ee;border-radius:12px;padding:7px 10px;font-size:11px;display:none}.outfitBadge.show{display:block}
+
 /* Наряды без прямоугольников: меняем только штаны, заколки и аксессуары */
 .accessory{position:absolute;z-index:4;pointer-events:none;display:none}.accessory.on{display:block}
 .pants{position:absolute;z-index:3;top:58%;left:50%;transform:translateX(-50%);width:205px;height:145px;display:none;pointer-events:none;filter:drop-shadow(0 3px 2px #39435c18)}
@@ -40,12 +40,12 @@ header{display:flex;justify-content:space-between;align-items:center}.brand{font
 <div id="pants" class="pants classic"><span class="leg left"></span><span class="leg right"></span></div>
 <div id="clip1" class="clip one"></div><div id="clip2" class="clip two"></div>
 <div id="hatBeanie" class="hat beanie"></div><div id="hatParty" class="hat party"></div><div id="hatCyber" class="hat cyberHat"></div>
-<div id="outfitBadge" class="outfitBadge"></div>
+
 </section>
 <section class="card timerbox"><h2>Pomodoro</h2><div class="circle"><div class="timer" id="timer">25:00</div><button class="play" id="start">▶</button></div><div class="modes"><button data-min="15">15</button><button data-min="25" class="active">25</button><button data-min="45">45</button></div><button class="reset" id="reset">↻ Сбросить</button><div class="reward">За завершение: <b id="rewardCoins">20 🪙</b></div><p style="font-size:12px;opacity:.6">Монеты начисляются только за полностью завершённую сессию.</p></section>
 </div>
 <nav class="bottom">
-<button class="action" id="feed"><span>🍔</span>Кормить</button><button class="action" id="games"><span>🎮</span>Мини-игры</button><button class="action" id="rest"><span>🛏</span>Отдых</button><button class="action" id="wardrobe"><span>👗</span>Гардероб</button><button class="action" id="ach"><span>☆</span>Достижения</button>
+<button class="action" id="feed"><span>🍔</span>Кормить</button><button class="action" id="games"><span>🎮</span>Мини-игры</button><button class="action" id="rest"><span>🛏</span>Отдых</button><button class="action" id="ach"><span>☆</span>Достижения</button>
 </nav></div>
 <div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle"></h2><button class="close" id="close">×</button></div><div id="modalBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
@@ -58,7 +58,15 @@ function save(){try{localStorage.setItem('jinxFinal',JSON.stringify(S))}catch(e)
 function clamp(x){return Math.max(0,Math.min(100,Math.round(x)))}
 function render(){const a=[['🍴','Голод','hunger'],['♥','Настроение','mood'],['⚡','Энергия','energy'],['💧','Чистота','clean']];$('#stats').innerHTML=a.map(x=>`<div class="stat"><div class="statline"><span>${x[0]} ${x[1]}</span><b>${S[x[2]]}%</b></div><div class="bar"><div class="fill" style="width:${S[x[2]]}%"></div></div></div>`).join('');$('#coins').textContent=S.coins;$('#level').textContent=S.level;$('#xp').textContent=S.xp;$('#timer').textContent=String(Math.floor(remain/60)).padStart(2,'0')+':'+String(remain%60).padStart(2,'0');$('#rewardCoins').textContent=(rewards[Math.round(total/60)]||20)+' 🪙';updateOutfit();updateSleep()}
 function toast(t){let e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
-function say(t){$('#speech').textContent=t;toast(t)}
+let speechTimer=null;
+function say(t){
+  const e=$('#speech');
+  e.textContent=t;
+  e.style.display='block';
+  clearTimeout(speechTimer);
+  speechTimer=setTimeout(()=>{e.style.display='none'},3000);
+  toast(t);
+}
 function updateSleep(){if(sleeping){$('#jinx').classList.add('sleep');$('#sleepImg').classList.add('on')}else{$('#jinx').classList.remove('sleep');$('#sleepImg').classList.remove('on')}updateOutfit()}
 function updateOutfit(){
  const names={classic:'Классика',hoodie:'Капюшон',home:'Домашний',sleep:'Пижама',pink:'Праздничный',cyber:'Киберпанк'};
@@ -69,7 +77,7 @@ function updateOutfit(){
  $('#hatBeanie').classList.toggle('on',!sleeping&&S.outfit==='hoodie');
  $('#hatParty').classList.toggle('on',!sleeping&&S.outfit==='pink');
  $('#hatCyber').classList.toggle('on',!sleeping&&S.outfit==='cyber');
- $('#outfitBadge').textContent=names[S.outfit];$('#outfitBadge').classList.toggle('show',!sleeping)
+ 
 }
 function act(a,b,c,msg){S.hunger=clamp(S.hunger+a);S.mood=clamp(S.mood+b);S.energy=clamp(S.energy+c);save();render();say(msg)}
 function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modal').classList.add('open')}
@@ -78,13 +86,6 @@ $('#close').onclick=closeModal;$('#modal').onclick=e=>{if(e.target.id==='modal')
 $('#feed').onclick=()=>{if(S.coins<5){say('Нужны монетки! Проведи фокус-сессию 🪙');return}openFood()};
 function openFood(){const food=[['🧁','Кекс',5,15],['🍔','Бургер',8,25],['🍬','Конфета',4,10],['🐟','Рыба',7,20],['🍕','Пицца',10,30],['🍰','Торт',12,40]];openModal('Кормление — выбери еду',`<p style="font-size:13px">У тебя <b>${S.coins} 🪙</b>. Каждая еда стоит монеты.</p><div class="choices">${food.map(f=>`<button class="choice" data-food="${f[2]}" data-gain="${f[3]}">${f[0]}<b>${f[1]}</b><small>${f[2]} 🪙 · +${f[3]} голода</small></button>`).join('')}</div>`);document.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>{let cost=+b.dataset.food;if(S.coins<cost){say('Не хватает монет 🪙');return}S.coins-=cost;S.hunger=clamp(S.hunger+(+b.dataset.gain));S.mood=clamp(S.mood+4);save();render();closeModal();say('М-м! Спасибо за вкусняшку ♥')})}
 $('#rest').onclick=()=>{if(running){say('Сначала поставь таймер на паузу.');return}sleeping=true;S.energy=clamp(S.energy+10);S.mood=clamp(S.mood+5);save();render();say('Zzz... не буди меня...');setTimeout(()=>{sleeping=false;render()},9000)};
-$('#wardrobe').onclick=()=>{
- let o=[['classic','💙','Классика'],['hoodie','🖤','Капюшон'],['home','🏠','Домашний'],['sleep','🌙','Пижама'],['pink','💗','Праздничный'],['cyber','⚡','Киберпанк']];
- let colors=[['blue','Голубая'],['pink','Розовая'],['purple','Фиолетовая'],['yellow','Жёлтая'],['green','Мятная'],['red','Красная']];
- openModal('Гардероб',`<p style="font-size:13px">Без цветных прямоугольников — наряд меняет цвет штанов, а заколки можно перекрашивать отдельно.</p><div class="choices">${o.map(x=>`<button class="choice ${S.outfit===x[0]?'selected':''}" data-outfit="${x[0]}">${x[1]}<b>${x[2]}</b></button>`).join('')}</div><h3 style="font-size:14px;margin:22px 0 8px">Цвет заколок</h3><div class="choices">${colors.map(x=>`<button class="choice ${S.clipColor===x[0]?'selected':''}" data-clip="${x[0]}"><span style="display:inline-block;width:24px;height:24px;border-radius:7px;background:${({'blue':'#72c9ef','pink':'#ef8fc8','purple':'#a986df','yellow':'#f2c96b','green':'#72d0ae','red':'#e8757d'})[x[0]]}"></span><b>${x[1]}</b></button>`).join('')}</div>`);
- document.querySelectorAll('[data-outfit]').forEach(b=>b.onclick=()=>{S.outfit=b.dataset.outfit;sleeping=false;save();render();closeModal();say('Новый образ!')});
- document.querySelectorAll('[data-clip]').forEach(b=>b.onclick=()=>{S.clipColor=b.dataset.clip;save();render();closeModal();say('Заколки теперь другого цвета!')});
-};
 $('#ach').onclick=()=>openModal('Достижения',`<div class="choices"><div class="choice">🪙<b>${S.coins}</b><small>монет</small></div><div class="choice">⏱️<b>${S.sessions}</b><small>фокус-сессий</small></div><div class="choice">⭐<b>${S.level}</b><small>уровень · ${S.xp} XP</small></div></div>`);
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{if(running)return;total=+b.dataset.min*60;remain=total;document.querySelectorAll('.modes button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});
 $('#start').onclick=()=>{if(running){clearInterval(iv);running=false;$('#start').textContent='▶';say('Пауза. Возвращайся, когда будешь готов.');return}sleeping=false;running=true;$('#start').textContent='Ⅱ';say('Фокусируемся вместе ♥');iv=setInterval(()=>{remain--;render();if(remain<=0){clearInterval(iv);running=false;let mins=Math.round(total/60),reward=rewards[mins]||20;S.coins+=reward;S.sessions++;S.xp+=50;if(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;say(`Новый уровень! +${reward} 🪙 ⭐`)}else say(`Сессия завершена! +${reward} 🪙 ♥`);save();remain=total;$('#start').textContent='▶';render()}},1000)};
